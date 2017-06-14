@@ -1,6 +1,6 @@
 # aws-scripts
 
-Some miscelaneous scripts for managing aws resources.
+Some miscellaneous scripts for managing aws resources.
 
 ## scritps
 ### snapshot_tagger.rb

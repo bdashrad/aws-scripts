@@ -18,6 +18,30 @@ filters = { filters: [{
   values: [account_id]
 }] }
 
+vol_tags = ['Name','Platform','Role','Service']
+
+volume_snaps = []
+ec2.volumes.each do |volume|
+  next unless volume.snapshot_id
+  next if volume.snapshot_id.length == 0
+  next if volume_snaps.include?(volume.snapshot_id)
+  volume_snaps << volume.snapshot_id
+  puts "Copying tags for #{volume.snapshot_id} from #{volume.volume_id}"
+  volume.tags.each do |tag|
+    next unless vol_tags.include?(tag.key)
+    begin
+      ec2.snapshot(volume.snapshot_id).create_tags(
+        tags: [{
+          key: tag.key,
+          value: tag.value
+        }]
+      )
+    rescue Aws::EC2::Errors::InvalidSnapshotNotFound
+      next
+    end
+  end
+end
+
 untagged_snaps = []
 ec2.snapshots(filters).each do |snap|
   next if required_tags.all? do |required_tag|
